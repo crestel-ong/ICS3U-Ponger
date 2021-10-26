@@ -1,3 +1,9 @@
+Class = require 'class'
+push = require 'push'
+
+require 'Ball'
+require 'Paddle'
+
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
@@ -6,7 +12,6 @@ VIRTUAL_HEIGHT = 243
 
 PADDLE_SPEED = 200
 
-push = require 'push'
 
 --[[
    Runs when the game first starts up, only once; used to initilize the game.
@@ -37,15 +42,9 @@ function love.load()
   player1Score = 0
   player2Score = 0
 
-  -- paddle positions on the Y axis (they can only move up or down)
-  player1Y = 30
-  player2Y = VIRTUAL_HEIGHT - 50
-
-  ballX = VIRTUAL_WIDTH / 2 - 2
-  ballY = VIRTUAL_HEIGHT / 2 - 2
-
-  ballDX = math.random(2) == 1 and -100 or 100
-  ballDY = math.random(-50, 50)
+  paddle1 = Paddle(5, 20, 5, 20)
+  paddle2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
+  ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 5, 5)
 
   gameState = 'start'
 end
@@ -56,31 +55,41 @@ end
 ]]
 function love.update(dt)
 
+  paddle1:update(dt)
+  paddle2:update(dt)
+
   -- player 1 movement
   if love.keyboard.isDown('w') then
 
     -- add negitive paddle speed to curent Y scaled by deltaTime
-    player1Y = math.max(0, player1Y - PADDLE_SPEED * dt)
+    -- now, we clamp our position between the bounds of the screen
+    -- math.max returns the greater of two values; 0 and player Y
+    -- wil ensure we don't go above it
+    paddle1.dy = -PADDLE_SPEED
   elseif love.keyboard.isDown('s') then
 
     -- add positive speed to current Y scaled by deltaTime
-    player1Y = math.min(VIRTUAL_HEIGHT - 20, player1Y + PADDLE_SPEED * dt)
+    -- math.min returns the lesser of two values; bottom of the edge minius paddle height
+    -- and player Y will ensure we don't go below it
+    paddle1.dy = PADDLE_SPEED
+  else
+    paddle1.dy = 0
   end
 
   -- player 2 movment
   if love.keyboard.isDown('up') then
 
-    -- add negitive paddle speed to current Y scaled by deltaTime
-    player2Y = math.max(0, player2Y - PADDLE_SPEED * dt)
+    paddle2.dy = -PADDLE_SPEED
   elseif love.keyboard.isDown('down') then
 
     -- add positive paddle speed to current Y scaled by deltaTime
-    player2Y = math.min(VIRTUAL_HEIGHT - 20, player2Y + PADDLE_SPEED * dt)
+    paddle2.dy = PADDLE_SPEED
+  else
+    paddle2.dy = 0
   end
 
   if gameState == 'play' then
-    ballX = ballX + ballDX * dt
-    ballY = ballY + ballDY * dt
+    ball:update(dt)
   end
 end
 
@@ -100,12 +109,7 @@ function love.keypressed(key)
       gameState = 'play'
     elseif gameState == 'play' then
       gameState = 'start'
-
-      ballX = VIRTUAL_WIDTH / 2 - 2
-      ballY = VIRTUAL_HEIGHT / 2 - 2
-
-      ballDX = math.random(2) == 1 and -100 or 100
-      ballDY = math.random(-50, 50)
+      ball:reset()
     end
   end
 end
@@ -141,14 +145,11 @@ function love.draw()
   love.graphics.print(player1Score, VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 3)
   love.graphics.print(player2Score, VIRTUAL_WIDTH / 2 + 30, VIRTUAL_HEIGHT / 3)
 
-  -- render ball (center)
-  love.graphics.rectangle('fill',  ballX, ballY, 4, 4)
-
   -- render first paddle(left side)
-  love.graphics.rectangle('fill', 10, player1Y, 5, 20)
+  paddle1:render()
+  paddle2:render()
 
-  -- render second paddle(right side)
-  love.graphics.rectangle('fill', VIRTUAL_WIDTH - 10, player2Y, 5, 20)
+  ball:render()
 
   -- end rendering at virtual resolution
   push:apply('end')
