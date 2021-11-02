@@ -13,6 +13,7 @@ VIRTUAL_HEIGHT = 243
 PADDLE_SPEED = 200
 
 
+
 --[[
    Runs when the game first starts up, only once; used to initilize the game.
 ]]
@@ -149,9 +150,18 @@ function love.draw()
   paddle1:render()
   paddle2:render()
 
+  -- render ball using it's class's render method
   ball:render()
+
+  displayFPS()
 
   -- end rendering at virtual resolution
   push:apply('end')
 end
- 
+
+function displayFPS()
+  love.graphics.setColor(0, 1, 0, 1)
+  love.graphics.setFont(smallFont)
+  love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 40, 20)
+  love.graphics.setColor(1, 1, 1, 1)
+end
