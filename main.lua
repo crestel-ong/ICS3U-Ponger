@@ -43,7 +43,7 @@ function love.load()
   push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
     fullscreen = false,
     vsync = true,
-    resizable = false
+    resizable = true
    })
 
   -- initilize score variables, used for rendering on the screen and keeping
@@ -67,6 +67,11 @@ function love.load()
 
 
   gameState = 'start'
+end
+
+-- calling them unkown becuase they woun't always be the same
+function love.resize(unknownWidth, unknownHeight)
+  push:resize(unknownWidth, unknownHeight)
 end
 
 --[[
